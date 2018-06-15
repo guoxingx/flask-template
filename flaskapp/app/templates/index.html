@@ -1,0 +1,17 @@
+
+<html>
+
+	<h1>I am Index</h1>
+	<form method="POST" enctype="multipart/form-data" action="">
+		<input type="file" name="image">
+		<input type="text" name="filename" placeholder="filename">
+		<button type="submit">Upload</button>
+	</form>
+	{% for image in image_list %}
+		<div style="display: inline-block;">
+			<img src="{{ image_url(image) }}" style="width: 100px; margin: 10px">
+			<p style="width: 100px">{{ image }}</p>
+		</div>
+	{% endfor %}
+
+</html>

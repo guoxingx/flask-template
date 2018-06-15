@@ -1,0 +1,6 @@
+venv
+*.pyc
+*.swp
+data/
+tags
+.env
