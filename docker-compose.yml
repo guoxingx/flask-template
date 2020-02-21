@@ -1,20 +1,75 @@
 version: "3"
 services:
 
+    # application
     flaskapp:
+
+        # build from ./flaskapp/Dockerfile
         build: ./flaskapp
+
+        # ports allowed in container
         expose:
             - "8000"
+
+        # apply env args into container from env file
         env_file: .env
+
+        # time zone
         environment:
             - TZ=PRC
+
+        # static files copied into container
         volumes:
             - ./flaskapp/app/static:/flaskapp/app/static
+
+        # this container must be started when the following container is running
+        depends_on:
+            - mysql
+
+        # command to run the container
         command: ./wsgi.py
 
+    # nginx
     nginx:
+
+        # build from ./nginx/Dockerfile
         build: ./nginx
+
+        # ports allowed in container
         ports:
             - "80:80"
+
+        # static files copied into container
+        # same dir to flaskapp.volums
+        # it's necessary cause we need to visit static files with nginx
         volumes:
             - ./flaskapp/app/static:/nginx/static
+
+        depends_on:
+            - flaskapp
+
+    # mysql
+    mysql:
+        # build from image mysql5.7
+        image: mysql:5.7
+
+        # ports allowed in container
+        ports:
+            - "3306:3306"
+
+        # env args from the HOST ENV
+        # flaskapp will load these env args from .env file
+        # so make sure they are the same to ensure the mysql connection
+        environment:
+            - TZ=PRC
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+            - MYSQL_USER=${MYSQL_USER}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+            - MYSQL_DATABASE=${MYSQL_DATABASE}
+
+        # mysql data files linked to host
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+
+        # command to run 
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
